@@ -1,0 +1,7 @@
+= Sample Paintings Doc
+
+[.toc-paintings]
+== List of Paintings
+
+== Section
+painting::http://images.fineartamerica.com/images/artworkimages/mediumlarge/1/flora-transporters-dana-oregan.jpg["Flora Transporters", "Dana O'Regan", medium="Acrylic On Canvas", size="20 x 24 inches", year="2010"]

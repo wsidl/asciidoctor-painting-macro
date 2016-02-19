@@ -1,0 +1,5 @@
+= README
+Will Siddall <will.siddall@gmail.com>
+19/02/2016
+
+An extension for the AsciiDoctor (asciidoctor/asciidoctor) document parser allowing for custom image types 'paintings'. Also includes another class for creating custom Tables of Contents.
