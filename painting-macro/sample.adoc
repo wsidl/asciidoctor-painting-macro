@@ -1,6 +1,6 @@
 = Sample Paintings Doc
 
-[.toc-paintings]
+[[toc-paintings]]
 == List of Paintings
 
 == Section

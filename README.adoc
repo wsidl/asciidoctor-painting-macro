@@ -1,5 +1,74 @@
-= README
+= Painting Macro
 Will Siddall <will.siddall@gmail.com>
 19/02/2016
 
-An extension for the AsciiDoctor (asciidoctor/asciidoctor) document parser allowing for custom image types 'paintings'. Also includes another class for creating custom Tables of Contents.
+An extension for the AsciiDoctor (https://github.com/asciidoctor/asciidoctor) document parser allowing for custom image types 'paintings'. Also includes another class for creating custom Tables of Contents.
+
+To use the extension, add the files to your project's "lib" directory and run the command
+
+[source,bash]
+$ asciidoctor -r ./lib/painting-macro.rb document.adoc
+
+== Using the Extension
+To work with the extension, you will have access to a new macro call "painting::". It is used similarly to an "image::" macro but has a number of attributes for defining the properties of a painting.
+
+.An example of inserting a painting object into a document
+```
+== Source of Paintings
+
+painting::source.png["The Epic Title", "Amazing Artist", "New York, NY", "Oil on Canvas", "15 x 12 inches", "2014"]
+
+painting::source2.png[title="Not so Epic Title", artist="Amazing Artist", location="Seoul, KR", medium="Acrylic on Plywood", size="4 x 8 feet", "2015"]
+```
+
+[INFO]
+Some work will be needed to allow for custom styling of the attributes. Currently, you will need to modify the Ruby code to apply your own layout.
+
+Once the paintings are inserted, you can insert the Table of Paintings by creating an emtpy, id'd Section.
+
+.Create the Table of Paintings
+```
+[[toc-paintings]]
+== Table of Paintings
+
+== Source of Paintings
+...
+```
+
+== Custom Table of Contents
+Within the extension is a AsciiDoctor Treeprocessor that cycles through objects of a specific type (using the Document's find_by method) and listing the items. It is simple to add your own criteria to this class for another custom Table of Contents.
+
+If you are interested in a Table of Contents for all images within your project and prepare your document and code.
+
+For the Asciidoctor document, specify the level 2 header with the role name you want to look for (be sure it is unique)
+
+```
+[[toc-figures]]
+== Table of Figures
+
+== Introduction
+painting::source.png["title", "artist", "location", "medium", "size", "year"]
+```
+
+In the Ruby extension, modify the Treeprocessor (or create your own) that will parse the figures you wish.
+
+[source,ruby]
+class PaintingTOCTreeprocessor < Extensions::Treeprocessor
+  def process document
+    tocfigures = []
+    figure_id = 0
+    case document.backend
+    when 'html5' then
+      document.find_by context: :image do |block|
+        figure_id += 1
+        block.id = figure_id
+        tocfigures.push("<li><a href=\"#figure_#{figure_id}\">Figure #{figure_id}: #{block.title}</a></li>")
+      end
+      tocfigures = "<div id=\"toc\" class\"toc\"><ul>\n#{tocfigures.join("\n")}</ul></div>"
+    end
+    document.find_by id: "toc-figures" {|b| b << Block.new(b, :pass, :source => tocfogures)}
+  end
+end
+
+[WARNING]
+Notice that the 'id' attribute on the new 'div' tag is "toc". This will break HTML Compliance as this was stolen from Asciidoctor's built-in Table of Contents. This was done to keep with the style used by Asciidoctor's own stylesheets. If you create your own stylesheets, then define your own layout.

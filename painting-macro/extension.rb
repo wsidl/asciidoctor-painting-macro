@@ -42,18 +42,26 @@ class PaintingTOCTreeprocessor < Extensions::Treeprocessor
 
   def process document
     tocpaintings = []
+    tocfigures = []
     mask = ""
     figid = 0
     case document.backend
     when 'html5' then
+      document.find_by context: :image do |block|
+        unless block.title == nil
+          figid += 1
+          block.id = figid
+          tocfigures.push("<li><a href=\"#figure_#{figid}\">Figure #{figid}: #{block.title}</a></li>")
+        end
+      end
       document.find_by context: :pass, role: "painting" do |block|
         year = " (#{block.attributes['year']})" unless block.attributes['year'] == nil
         tocpaintings.push("<li><a href=\"##{block.id}\">Painting #{block.attributes[:index]}: \"#{block.title}\"#{year}</a></li>")
       end
+      tocfigures = "<div id=\"toc\" class=\"toc\"><ul>\n#{tocfigures.join("\n")}</ul></div>"
       tocpaintings = "<div id=\"toc\" class=\"toc\"><ul>\n#{tocpaintings.join("\n")}</ul></div>"
     end
-    document.find_by role: "toc-paintings" do |b|
-      b << Block.new(b, :pass, :source => tocpaintings)
-    end
+    document.find_by(id: "toc-paintings") {|b| b << Block.new(b, :pass, :source => tocpaintings)}
+    document.find_by(id: "toc-figures") {|b| b << Block.new(b, :pass, :source => tocfigures)}
   end
 end
